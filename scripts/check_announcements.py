@@ -19,6 +19,9 @@ SOURCE_URL = "https://www.osym.gov.tr/duyurular/index"
 DEFAULT_WEBHOOK_URL = "https://webhook.site/7c90a1ec-1890-402c-9a16-823bf3852200"
 # GitHub Actions secret'ı tanımlı değilse veya boşsa varsayılana düşer.
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL") or DEFAULT_WEBHOOK_URL
+# Sayfa, arama kutusu için görünmeyen çok sayıda eski duyuruyu da DOM'a
+# gömüyor (bir seferinde 343 kayıt gelmişti); sadece en güncel N tanesini gönder.
+MAX_ANNOUNCEMENTS = 20
 REQUEST_TIMEOUT = 30
 HEADERS = {
     "User-Agent": (
@@ -59,7 +62,7 @@ def fetch_announcements() -> list[dict]:
             }
         )
 
-    return announcements
+    return announcements[:MAX_ANNOUNCEMENTS]
 
 
 def send_webhook(announcements: list[dict]) -> None:
