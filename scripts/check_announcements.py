@@ -102,6 +102,8 @@ def send_webhook(new_announcements: list[dict]) -> None:
 
 
 def main() -> int:
+    force_all = os.environ.get("FORCE_SEND_ALL", "").strip().lower() == "true"
+
     announcements = fetch_announcements()
     if not announcements:
         print("Hiç duyuru bulunamadı; sayfa yapısı değişmiş olabilir.", file=sys.stderr)
@@ -109,6 +111,12 @@ def main() -> int:
 
     current_ids = [a["id"] for a in announcements]
     seen_ids = load_seen_ids()
+
+    if force_all:
+        print(f"FORCE_SEND_ALL aktif: state'e bakılmadan mevcut {len(announcements)} duyuru gönderiliyor (test amaçlı).")
+        send_webhook(announcements)
+        save_seen_ids(current_ids + list(seen_ids or []))
+        return 0
 
     if seen_ids is None:
         print("İlk çalıştırma: state dosyası yok, mevcut duyurular sadece kaydediliyor (webhook'a gönderilmiyor).")
