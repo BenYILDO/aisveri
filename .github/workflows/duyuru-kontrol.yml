@@ -4,15 +4,7 @@ on:
   schedule:
     # 07:00 UTC = 10:00 Türkiye saati (TR, UTC+3, DST uygulamıyor)
     - cron: "0 7 * * *"
-  workflow_dispatch:
-    inputs:
-      force_all:
-        description: "Test amaçlı: state'e bakmadan mevcut tüm duyuruları webhook'a gönder"
-        type: boolean
-        default: false
-
-permissions:
-  contents: write
+  workflow_dispatch: {}
 
 jobs:
   check-announcements:
@@ -29,23 +21,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Duyuruları kontrol et ve webhook'a gönder
+      - name: Duyuruları çek ve webhook'a gönder
         env:
           # Repo Settings > Secrets and variables > Actions içinde
           # ANNOUNCEMENT_WEBHOOK_URL tanımlıysa o kullanılır; tanımlı değilse
           # script kendi içindeki varsayılan webhook.site adresine düşer.
           WEBHOOK_URL: ${{ secrets.ANNOUNCEMENT_WEBHOOK_URL }}
-          FORCE_SEND_ALL: ${{ inputs.force_all }}
         run: python scripts/check_announcements.py
-
-      - name: State dosyasını commitle
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- data/seen_announcements.json; then
-            git add data/seen_announcements.json
-            git commit -m "chore: duyuru state güncellendi"
-            git push
-          else
-            echo "State değişmedi, commit gerekmiyor."
-          fi
