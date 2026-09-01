@@ -1,0 +1,44 @@
+name: ÖSYM Duyuru Kontrolü
+
+on:
+  schedule:
+    # 07:00 UTC = 10:00 Türkiye saati (TR, UTC+3, DST uygulamıyor)
+    - cron: "0 7 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  check-announcements:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Duyuruları kontrol et ve webhook'a gönder
+        env:
+          # Farklı bir webhook adresi kullanmak isterse repo Settings > Secrets
+          # kısmına ANNOUNCEMENT_WEBHOOK_URL eklenip aşağıdaki satır güncellenebilir.
+          WEBHOOK_URL: "https://webhook.site/7c90a1ec-1890-402c-9a16-823bf3852200"
+        run: python scripts/check_announcements.py
+
+      - name: State dosyasını commitle
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- data/seen_announcements.json; then
+            git add data/seen_announcements.json
+            git commit -m "chore: duyuru state güncellendi"
+            git push
+          else
+            echo "State değişmedi, commit gerekmiyor."
+          fi
