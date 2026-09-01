@@ -22,9 +22,9 @@ import requests
 from bs4 import BeautifulSoup
 
 SOURCE_URL = "https://www.osym.gov.tr/duyurular/index"
-WEBHOOK_URL = os.environ.get(
-    "WEBHOOK_URL", "https://webhook.site/7c90a1ec-1890-402c-9a16-823bf3852200"
-)
+DEFAULT_WEBHOOK_URL = "https://webhook.site/7c90a1ec-1890-402c-9a16-823bf3852200"
+# GitHub Actions secret'ı tanımlı değilse veya boşsa varsayılana düşer.
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL") or DEFAULT_WEBHOOK_URL
 STATE_FILE = Path(__file__).resolve().parent.parent / "data" / "seen_announcements.json"
 MAX_STATE_ITEMS = 300
 REQUEST_TIMEOUT = 30

@@ -26,9 +26,10 @@ jobs:
 
       - name: Duyuruları kontrol et ve webhook'a gönder
         env:
-          # Farklı bir webhook adresi kullanmak isterse repo Settings > Secrets
-          # kısmına ANNOUNCEMENT_WEBHOOK_URL eklenip aşağıdaki satır güncellenebilir.
-          WEBHOOK_URL: "https://webhook.site/7c90a1ec-1890-402c-9a16-823bf3852200"
+          # Repo Settings > Secrets and variables > Actions içinde
+          # ANNOUNCEMENT_WEBHOOK_URL tanımlıysa o kullanılır; tanımlı değilse
+          # script kendi içindeki varsayılan webhook.site adresine düşer.
+          WEBHOOK_URL: ${{ secrets.ANNOUNCEMENT_WEBHOOK_URL }}
         run: python scripts/check_announcements.py
 
       - name: State dosyasını commitle
